@@ -26,3 +26,21 @@ A powerful AI-driven application that converts text, PDFs, and images into speec
 git clone https://github.com/your-username/volna.git
 cd volna
 python manage.py runserver
+
+## Contributors
+
+<a href="https://github.com/devangvangane">
+  <img src="https://github.com/devangvangane.png" width="50" height="50" />
+</a>
+
+<a href="https://github.com/Dhruv00421">
+  <img src="https://github.com/Dhruv00421.png" width="50" height="50" />
+</a>
+
+
+
+<a href="https://github.com/surajit-pal">
+  <img src="https://github.com/surajit-pal.png" width="50" height="50" />
+</a>
+
+
