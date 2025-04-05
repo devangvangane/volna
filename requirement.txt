@@ -1,0 +1,10 @@
+Django
+pillow
+python-pptx
+pytesseract
+pyttsx3
+python-docx
+PyPDF2
+gtts
+requests
+googletrans==4.0.0-rc1

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi-Function Converter</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #12121b);
+            color: #f1f1f1;
+            font-family: "Poppins";
+        }
+
+        .container-custom {
+            background: #242438;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-group .btn {
+            background-color: #2a2a3b;
+            color: #fff;
+            border: 1px solid #3a3a50;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group .btn.active,
+        .btn-group .btn:hover {
+            background-color: #5e60ce;
+            color: #fff;
+            border-color: #5e60ce;
+            transform: scale(1.05);
+        }
+
+        .form-control,
+        .form-select {
+            background-color: #1e1e2d;
+            color: #f1f1f1;
+            border: 1px solid #444;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+
+            border-color: #5e60ce;
+            box-shadow: 0 0 0 0.2rem rgba(94, 96, 206, 0.25);
+        }
+
+        .file-list li {
+            background-color: #2c2c44;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .delete-btn {
+            background-color: #e63946;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #d62839;
+        }
+
+        h2,
+        h3 {
+            color: #fdf6ff;
+        }
+
+        audio {
+            background: #1f1f30;
+            border-radius: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-4 text-center">
+        <!-- Logo Image -->
+        <div class="mb-4">
+            {% load static %}
+
+            <img src="{% static 'v.png' %}" alt="VOLNA Logo" height="150" />
+
+        </div>
+
+
+        <!-- Navigation -->
+        <div class="btn-group mb-4 nav" role="group">
+            <button class="btn {% if functionality == 'tts' %}active{% endif %}"
+                onclick="window.location.href='/?functionality=tts'">EchoText</button>
+            <button class="btn {% if functionality == 'file-to-speech' %}active{% endif %}"
+                onclick="window.location.href='/?functionality=file-to-speech'">SpeakFile</button>
+            <button class="btn {% if functionality == 'image-to-speech' %}active{% endif %}"
+                onclick="window.location.href='/?functionality=image-to-speech'">VoxVision</button>
+            <button class="btn {% if functionality == 'ppt-to-speech' %}active{% endif %}"
+                onclick="window.location.href='/?functionality=ppt-to-speech'">PitchVoice</button>
+            <button class="btn {% if functionality == 'translation' %}active{% endif %}"
+                onclick="window.location.href='/?functionality=translation'">VocaLingo</button>
+        </div>
+
+        <div class="container container-custom text-start">
+            {% if functionality == "tts" %}
+            <h3>Text-to-Speech</h3>
+            <form id="tts-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3 order-md-2">
+                        <div class="mb-3">
+                            <label for="speed" class="form-label">Speed:</label>
+                            <input type="number" id="speed" name="speed" min="50" max="300" step="10" value="150"
+                                class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="voice" class="form-label">Choose Voice:</label>
+                            <select id="voice" name="voice" class="form-select">
+                                <option value="default">Default (Male)</option>
+                                <option value="male">Male Voice</option>
+                                <option value="female">Female Voice</option>
+                            </select>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value="true" id="correct_grammar"
+                                name="correct_grammar">
+                            <label class="form-check-label" for="correct_grammar">
+                                Improve grammar with AI
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-success mt-2">Convert to Speech</button>
+                    </div>
+                    <div class="col-md-6 mb-3 order-md-1">
+                        <label for="text" class="form-label">Enter Text:</label>
+                        <textarea id="text" name="text" rows="10" required class="form-control"></textarea>
+                    </div>
+                </div>
+            </form>
+
+            {% elif functionality == "file-to-speech" %}
+            <h3>File-to-Speech</h3>
+            <form id="file-upload-form" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6 mb-3 order-md-2">
+                        <div class="mb-3">
+                            <label for="speed" class="form-label">Speed:</label>
+                            <input type="number" id="speed" name="speed" min="50" max="300" step="10" value="150"
+                                class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="voice" class="form-label">Choose Voice:</label>
+                            <select id="voice" name="voice" class="form-select">
+                                <option value="default">Default (Male)</option>
+                                <option value="male">Male Voice</option>
+                                <option value="female">Female Voice</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-2">Convert to Speech</button>
+                    </div>
+                    <div class="col-md-6 mb-3 order-md-1">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Upload File (DOCX, PDF):</label>
+                            <input type="file" id="file" name="file" accept=".docx,.pdf" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% elif functionality == "image-to-speech" %}
+            <h3>Image-to-Speech</h3>
+            <form id="image-upload-form" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6 mb-3 order-md-2">
+                        <div class="mb-3">
+                            <label for="voice" class="form-label">Choose Voice:</label>
+                            <select id="image-voice" name="voice" class="form-select">
+                                <option value="default">Default (Male)</option>
+                                <option value="male">Male Voice</option>
+                                <option value="female">Female Voice</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-2">Convert</button>
+                    </div>
+                    <div class="col-md-6 mb-3 order-md-1">
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Upload Image:</label>
+                            <input type="file" id="image" name="image" accept="image/*" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% elif functionality == "ppt-to-speech" %}
+            <h3>PPT-to-Speech</h3>
+            <form id="ppt-upload-form" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6 mb-3 order-md-2">
+                        <div class="mb-3">
+                            <label for="ppt-speed" class="form-label">Speed:</label>
+                            <input type="number" id="ppt-speed" name="speed" min="50" max="300" step="10" value="150"
+                                class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ppt-voice" class="form-label">Choose Voice:</label>
+                            <select id="ppt-voice" name="voice" class="form-select">
+                                <option value="default">Default (Male)</option>
+                                <option value="male">Male Voice</option>
+                                <option value="female">Female Voice</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-2">Convert</button>
+                    </div>
+                    <div class="col-md-6 mb-3 order-md-1">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Upload PPT File:</label>
+                            <input type="file" id="file" name="ppt" accept=".ppt,.pptx" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            {% elif functionality == "translation" %}
+            <h3>Translate Text to Speech</h3>
+            <form id="translation-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3 order-md-2">
+                        <div class="mb-3">
+                            <label for="language" class="form-label">Select Language:</label>
+                            <select id="language" name="language" class="form-select"></select>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-2">Translate & Convert</button>
+                    </div>
+                    <div class="col-md-6 mb-3 order-md-1">
+                        <label for="translate-text" class="form-label">Enter Text:</label>
+                        <textarea id="translate-text" name="text" rows="10" required class="form-control"></textarea>
+                    </div>
+                </div>
+            </form>
+
+            {% endif %}
+
+        </div>
+
+        <h3 class="mt-5">Generated Audio Files</h3>
+        <ul id="file-list" class="list-unstyled file-list">
+            {% for file in files %}
+            <li id="file-{{ file }}" class="d-flex justify-content-between align-items-center">
+                <audio controls class="me-3 w-75">
+                    <source src="/media/{{ file }}" type="audio/mpeg">
+                </audio>
+
+
+                <button class="btn delete-btn" onclick="deleteFile('{{ file }}')">Delete</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script>
+        async function loadLanguages() {
+            try {
+                const response = await fetch("/get-supported-languages"); // API to fetch supported languages
+                const data = await response.json();
+
+                if (data.languages) {
+                    const languageSelect = document.getElementById("language");
+                    languageSelect.innerHTML = ""; // Clear existing options
+
+                    Object.entries(data.languages).forEach(([code, name]) => {
+                        const option = document.createElement("option");
+                        option.value = code;
+                        option.textContent = name;
+                        languageSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading languages:", error);
+            }
+        }
+
+        window.onload = loadLanguages;
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const player = document.querySelector('.custom-player');
+            const audio = document.getElementById('audio-element');
+            const playBtn = document.getElementById('play-btn');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            const progressBar = document.getElementById('progress-bar');
+            const progressContainer = document.getElementById('progress-container');
+            const currentTimeDisplay = document.getElementById('current-time');
+            const durationDisplay = document.getElementById('duration');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeLevel = document.getElementById('volume-level');
+            const speedControl = document.getElementById('speed-control');
+            const waveAnimation = document.getElementById('wave-animation');
+            const waveBars = waveAnimation.querySelectorAll('.wave-bar');
+
+            // Initial state
+            let isPlaying = false;
+
+            // Format time in MM:SS
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            // Update progress bar
+            function updateProgress() {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = `${percent}%`;
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            }
+
+            // Set audio time based on progress bar click
+            function setProgress(e) {
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                const duration = audio.duration;
+                audio.currentTime = (clickX / width) * duration;
+            }
+
+            // Play/Pause toggle
+            function togglePlay() {
+                if (audio.paused) {
+                    audio.play();
+                    playIcon.style.display = 'none';
+                    pauseIcon.style.display = 'block';
+                    isPlaying = true;
+                    animateWaveBars();
+                } else {
+                    audio.pause();
+                    playIcon.style.display = 'block';
+                    pauseIcon.style.display = 'none';
+                    isPlaying = false;
+                    stopWaveAnimation();
+                }
+            }
+
+            // Set volume
+            function setVolume(e) {
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                const volume = clickX / width;
+                audio.volume = volume;
+                volumeLevel.style.width = `${volume * 100}%`;
+            }
+
+            // Animate wave bars when playing
+            function animateWaveBars() {
+                if (!isPlaying) return;
+
+                waveBars.forEach((bar, index) => {
+                    const height = 20 + Math.random() * 60;
+                    const animationDuration = 0.2 + Math.random() * 0.3;
+
+                    gsap.to(bar, {
+                        height: `${height}%`,
+                        duration: animationDuration,
+                        ease: "power1.inOut",
+                        onComplete: function () {
+                            if (isPlaying) {
+                                animateWaveBars();
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Stop wave animation
+            function stopWaveAnimation() {
+                waveBars.forEach(bar => {
+                    gsap.to(bar, {
+                        height: "70%",
+                        duration: 0.3,
+                        ease: "power2.out"
+                    });
+                });
+            }
+
+            // Change playback speed
+            speedControl.addEventListener('change', () => {
+                audio.playbackRate = speedControl.value;
+            });
+
+            // Event listeners
+            playBtn.addEventListener('click', togglePlay);
+            audio.addEventListener('timeupdate', updateProgress);
+            progressContainer.addEventListener('click', setProgress);
+            volumeSlider.addEventListener('click', setVolume);
+
+            // Load metadata
+            audio.addEventListener('loadedmetadata', () => {
+                durationDisplay.textContent = formatTime(audio.duration);
+            });
+
+            // When audio ends
+            audio.addEventListener('ended', () => {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                isPlaying = false;
+                stopWaveAnimation();
+                progressBar.style.width = '0%';
+                currentTimeDisplay.textContent = '0:00';
+            });
+        });
+    </script>
+    <script>
+        // GSAP Loading Animation Functions
+        function showLoadingAnimation() {
+            // Create loading container if it doesn't exist
+            if (!document.getElementById('loading-animation')) {
+                const loadingContainer = document.createElement('div');
+                loadingContainer.id = 'loading-animation';
+                loadingContainer.style.position = 'fixed';
+                loadingContainer.style.top = '0';
+                loadingContainer.style.left = '0';
+                loadingContainer.style.width = '100%';
+                loadingContainer.style.height = '100%';
+                loadingContainer.style.backgroundColor = 'rgba(18, 18, 27, 0.8)';
+                loadingContainer.style.display = 'flex';
+                loadingContainer.style.flexDirection = 'column';
+                loadingContainer.style.justifyContent = 'center';
+                loadingContainer.style.alignItems = 'center';
+                loadingContainer.style.zIndex = '1000';
+
+                // Add wave animation container
+                const waveContainer = document.createElement('div');
+                waveContainer.className = 'wave-container';
+                waveContainer.style.display = 'flex';
+                waveContainer.style.justifyContent = 'center';
+                waveContainer.style.alignItems = 'flex-end';
+                waveContainer.style.height = '100px';
+                waveContainer.style.gap = '8px';
+
+                // Create wave bars
+                for (let i = 0; i < 5; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'wave-bar';
+                    bar.style.width = '12px';
+                    bar.style.height = '40px';
+                    bar.style.backgroundColor = '#5e60ce';
+                    bar.style.borderRadius = '6px';
+                    waveContainer.appendChild(bar);
+                }
+
+                // Create text element
+                const loadingText = document.createElement('div');
+                loadingText.innerText = 'Generating Audio...';
+                loadingText.style.color = '#ffffff';
+                loadingText.style.fontSize = '18px';
+                loadingText.style.fontWeight = '600';
+                loadingText.style.marginTop = '20px';
+
+                loadingContainer.appendChild(waveContainer);
+                loadingContainer.appendChild(loadingText);
+                document.body.appendChild(loadingContainer);
+
+                // Animate the bars
+                const bars = document.querySelectorAll('.wave-bar');
+                bars.forEach((bar, index) => {
+                    gsap.to(bar, {
+                        height: "80px",
+                        duration: 0.6,
+                        ease: "power2.inOut",
+                        repeat: -1,
+                        yoyo: true,
+                        delay: index * 0.1
+                    });
+                });
+
+                // Animate the text
+                gsap.to(loadingText, {
+                    opacity: 0.6,
+                    duration: 1,
+                    repeat: -1,
+                    yoyo: true
+                });
+
+                // Fade in the loading container
+                gsap.fromTo(loadingContainer,
+                    { opacity: 0 },
+                    { opacity: 1, duration: 0.3, ease: "power2.inOut" }
+                );
+            }
+        }
+
+        function hideLoadingAnimation() {
+            const loadingContainer = document.getElementById('loading-animation');
+            if (loadingContainer) {
+                // Fade out and remove
+                gsap.to(loadingContainer, {
+                    opacity: 0,
+                    duration: 0.3,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        document.body.removeChild(loadingContainer);
+                    }
+                });
+            }
+        }
+
+        // Animate page load with GSAP
+        document.addEventListener("DOMContentLoaded", () => {
+            gsap.from(".container-custom", {
+                duration: 1,
+                opacity: 0,
+                y: 30,
+                ease: "power2.out"
+            });
+
+            gsap.from(".container-custom form .form-label, .container-custom form .form-control, .container-custom form .form-select, .container-custom form button", {
+                duration: 0.6,
+                opacity: 0,
+                y: 20,
+                stagger: 0.1,
+                ease: "power3.out"
+            });
+
+            gsap.from(".file-list li", {
+                duration: 0.5,
+                opacity: 0,
+                y: 20,
+                stagger: 0.1,
+                ease: "power1.out"
+            });
+        });
+
+        // Original file list update function
+        async function updateFileList(files) {
+            let fileList = document.getElementById("file-list");
+            fileList.innerHTML = "";
+
+            // Filter to only include MP3 files
+            const mp3Files = files.filter(file => file.toLowerCase().endsWith('.mp3'));
+
+            mp3Files.forEach(file => {
+                let listItem = document.createElement("li");
+                listItem.className = "d-flex justify-content-between align-items-center file-list-item";
+                listItem.id = `file-${file}`;
+                listItem.innerHTML = `
+          <audio controls class="me-3 w-75">
+            <source src="/media/${file}" type="audio/mpeg">
+          </audio>
+          <button class="btn delete-btn" onclick="deleteFile('${file}')">Delete</button>
+        `;
+                fileList.appendChild(listItem);
+
+                // Animate new file
+                gsap.from(listItem, {
+                    opacity: 0,
+                    y: 20,
+                    duration: 0.4,
+                    ease: "power2.out"
+                });
+            });
+        }
+        // Updated form submission handlers with loading animation
+        document.getElementById("tts-form")?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            let response = await fetch("/text-to-speech/", {
+                method: "POST",
+                body: formData
+            });
+
+            let data = await response.json();
+            if (data.files) {
+                updateFileList(data.files);
+            } else {
+                alert("Error: " + (data.error || "Something went wrong!"));
+            }
+        });
+
+        document.getElementById("file-upload-form")?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            showLoadingAnimation();
+
+            try {
+                let response = await fetch("/file-to-speech/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let data = await response.json();
+
+                hideLoadingAnimation();
+
+                if (data.files) {
+                    updateFileList(data.files);
+                } else {
+                    alert("Error: " + (data.error || "Something went wrong!"));
+                }
+            } catch (error) {
+                hideLoadingAnimation();
+                alert("Error: Something went wrong!");
+                console.error(error);
+            }
+        });
+
+        document.getElementById("image-upload-form")?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            showLoadingAnimation();
+
+            try {
+                let response = await fetch("/image-to-speech/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let data = await response.json();
+
+                hideLoadingAnimation();
+
+                console.log("Response from backend:", data);
+
+                if (data.audio_url) {
+                    let fileList = document.getElementById("file-list");
+                    let listItem = document.createElement("li");
+                    listItem.innerHTML = `
+                        <audio controls>
+                            <source src="${data.audio_url}" type="audio/mpeg">
+                        </audio>
+                        <button class="delete-btn" onclick="deleteFile('${data.audio_url}')">Delete</button>
+                    `;
+                    fileList.appendChild(listItem);
+                } else {
+                    alert("Error: " + (data.error || "Something went wrong!"));
+                }
+            } catch (error) {
+                hideLoadingAnimation();
+                alert("Something went wrong! Check the console for errors.");
+                console.error("Image-to-Speech Error:", error);
+            }
+        });
+
+        document.getElementById("ppt-upload-form")?.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const form = document.getElementById("ppt-upload-form");
+            const formData = new FormData(form);
+
+            showLoadingAnimation();
+
+            try {
+                const response = await fetch("/pptx-to-speech/", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                hideLoadingAnimation();
+
+                if (data.audio_url) {
+                    updateFileList(data.files);
+                } else {
+                    alert("Error: " + (data.error || "Something went wrong!"));
+                }
+            } catch (err) {
+                hideLoadingAnimation();
+                console.error("Error:", err);
+                alert("Something went wrong during PPT-to-Speech conversion.");
+            }
+        });
+
+        document.getElementById("translation-form")?.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            showLoadingAnimation();
+
+            try {
+                let response = await fetch("/translation/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let data = await response.json();
+
+                hideLoadingAnimation();
+
+                if (data.files) {
+                    updateFileList(data.files);
+                } else {
+                    alert("Error: " + (data.error || "Something went wrong!"));
+                }
+            } catch (error) {
+                hideLoadingAnimation();
+                alert("Error: Something went wrong!");
+                console.error(error);
+            }
+        });
+
+        async function deleteFile(fileName) {
+            let formData = new FormData();
+            formData.append("file_name", fileName);
+
+            let response = await fetch("/delete-audio/", {
+                method: "POST",
+                body: formData
+            });
+
+            let data = await response.json();
+            if (data.files) {
+                updateFileList(data.files);
+            } else {
+                alert("Error: " + (data.error || "Something went wrong!"));
+            }
+        }
+
+    </script>
+</body>
+
+</html>
