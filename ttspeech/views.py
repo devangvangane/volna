@@ -23,7 +23,7 @@ GEMINI_API_KEY = "AIzaSyAHygzhpSGaLo2ZiqkoLeORfa_a9iugEf0"
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
 
 # Initialize TTS Engine
-engine = pyttsx3.init()
+# engine = pyttsx3.init()
 
 # Fetch available voices
 voices = engine.getProperty("voices")
@@ -80,6 +80,7 @@ def improve_text_with_gemini_grammar(text):
 @csrf_exempt
 def text_to_speech(request):
     """Convert text input to speech with optional grammar correction using Gemini AI."""
+    engine = pyttsx3.init()
     if request.method == "POST":
         text = request.POST.get("text", "").strip()
         speed = float(request.POST.get("speed", 150))
@@ -110,6 +111,7 @@ def text_to_speech(request):
         return JsonResponse({"audio_url": f"/media/{file_name}", "files": files})
 @csrf_exempt
 def file_to_speech(request):
+    engine = pyttsx3.init()
     """Convert uploaded PDF/DOCX to speech and return updated file list."""
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
@@ -164,6 +166,7 @@ def file_to_speech(request):
 
 @csrf_exempt
 def image_to_speech(request):
+    engine = pyttsx3.init()
     """Extract text from an image and convert it to speech."""
     if request.method == "POST" and request.FILES.get("image"):
         image_file = request.FILES["image"]
@@ -244,6 +247,7 @@ def improve_text_with_gemini(text):
 
 @csrf_exempt
 def pptx_to_speech(request):
+    engine = pyttsx3.init()
     """Extract text from a PPTX file, improve it with Gemini, and convert it to speech."""
     if request.method == "POST" and request.FILES.get("ppt"):
         pptx_file = request.FILES["ppt"]
