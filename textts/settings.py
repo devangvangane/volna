@@ -24,7 +24,11 @@ SECRET_KEY = 'django-insecure-ft4-%!xsbr66u*fq))a1*x1wvicj-d#*n3apwtt!ycj=otj&*n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'volna-zhyc.onrender.com',  # Your Render domain
+    'localhost',                # For local dev
+    '127.0.0.1',
+]
 
 # Application definition
 
