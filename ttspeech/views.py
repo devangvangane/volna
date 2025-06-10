@@ -80,36 +80,44 @@ def improve_text_with_gemini_grammar(text):
 @csrf_exempt
 def text_to_speech(request):
     """Convert text input to speech with optional grammar correction using Gemini AI."""
-    engine = pyttsx3.init()
-    voices = engine.getProperty("voices")
-    if request.method == "POST":
-        text = request.POST.get("text", "").strip()
-        speed = float(request.POST.get("speed", 150))
-        voice = request.POST.get("voice", "default")
-        correct_grammar = request.POST.get("correct_grammar", "false").lower() == "true"
+    try:
+        engine = pyttsx3.init()
+        voices = engine.getProperty("voices")
+        if request.method == "POST":
+            text = request.POST.get("text", "").strip()
+            speed = float(request.POST.get("speed", 150))
+            voice = request.POST.get("voice", "default")
+            correct_grammar = request.POST.get("correct_grammar", "false").lower() == "true"
 
-        if not text:
-            return JsonResponse({"error": "Text field is required."}, status=400)
+            if not text:
+                return JsonResponse({"error": "Text field is required."}, status=400)
 
-        if correct_grammar:
-            print("Applying grammar correction via Gemini")
-            text = improve_text_with_gemini_grammar(text)
-            print("Corrected text:", text)
+            if correct_grammar:
+                print("Applying grammar correction via Gemini")
+                text = improve_text_with_gemini_grammar(text)
+                print("Corrected text:", text)
 
-        # Set voice properties
-        engine.setProperty("rate", speed)
+            # Set voice properties
+            engine.setProperty("rate", speed)
 
-        if voice in VOICE_MAP and VOICE_MAP[voice] is not None and VOICE_MAP[voice] < len(voices):
-            engine.setProperty("voice", voices[VOICE_MAP[voice]].id)
+            if voice in VOICE_MAP and VOICE_MAP[voice] is not None and VOICE_MAP[voice] < len(voices):
+                engine.setProperty("voice", voices[VOICE_MAP[voice]].id)
 
-        file_name = f"speech_{len(os.listdir(MEDIA_FOLDER)) + 1}.mp3"
-        file_path = os.path.join(MEDIA_FOLDER, file_name)
+            file_name = f"speech_{len(os.listdir(MEDIA_FOLDER)) + 1}.mp3"
+            file_path = os.path.join(MEDIA_FOLDER, file_name)
 
-        engine.save_to_file(text, file_path)
-        engine.runAndWait()
+            engine.save_to_file(text, file_path)
+            engine.runAndWait()
 
-        files = [f for f in os.listdir(MEDIA_FOLDER) if f.endswith(".mp3")]
-        return JsonResponse({"audio_url": f"/media/{file_name}", "files": files})
+            files = [f for f in os.listdir(MEDIA_FOLDER) if f.endswith(".mp3")]
+            return JsonResponse({"audio_url": f"/media/{file_name}", "files": files})
+        
+    except Exception as e:
+        import traceback
+        print("TTS View Error:", str(e))
+        print(traceback.format_exc())
+        return JsonResponse({"error": f"Internal server error: {str(e)}"}, status=500)
+
 @csrf_exempt
 def file_to_speech(request):
     engine = pyttsx3.init()
