@@ -1,4 +1,4 @@
-Django
+django
 pillow
 python-pptx
 pytesseract
